@@ -1,0 +1,9 @@
+flask==3.0.3
+flask-cors==4.0.1
+opencv-python==4.9.0.80
+numpy==1.26.4
+mediapipe==0.10.14
+tensorflow==2.16.2
+gTTS==2.5.1
+deep-translator==1.11.4
+Pillow==10.3.0

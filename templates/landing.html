@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GestureTalk — Competition Edition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream:#fdf6ee; --ink:#1a1208; --rust:#e85d2a; --rust2:#c8441a; --sage:#4a7c59;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html,body{width:100%;height:100%;overflow:hidden;background:var(--cream);
+              font-family:"DM Sans",sans-serif;color:var(--ink);}
+
+    body::after{content:"";position:fixed;inset:0;z-index:200;pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
+      background-size:200px;mix-blend-mode:multiply;}
+
+    .hands-frame{position:fixed;inset:0;z-index:10;pointer-events:none;overflow:hidden;}
+    .hands-img{width:100%;height:100%;object-fit:cover;object-position:center;
+               transform:scale(1.42);filter:sepia(0.42) hue-rotate(6deg) saturate(1.3) brightness(0.86);
+               animation:reveal 2.8s cubic-bezier(.76,0,.24,1) .1s forwards;}
+    @keyframes reveal{0%{transform:scale(1.42)}100%{transform:scale(1.0)}}
+    .wash{position:absolute;inset:0;
+          background:radial-gradient(ellipse at center,rgba(232,93,42,.22) 0%,rgba(26,18,8,.64) 100%);
+          animation:washOut 2.6s ease-out .1s forwards;}
+    @keyframes washOut{0%{opacity:1}100%{opacity:0}}
+
+    .center{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;text-align:center;padding:28px;
+            opacity:0;animation:rise 1s ease-out 2.1s forwards;
+            transition:transform 0.15s ease-out;}
+    @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+    .rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .ring{position:absolute;border-radius:50%;border:1px dashed rgba(26,18,8,.07);}
+    .r1{width:310px;height:310px;animation:spin 24s linear infinite;}
+    .r2{width:460px;height:460px;border-color:rgba(232,93,42,.08);animation:spin 36s linear reverse infinite;}
+    .r3{width:380px;height:380px;border:1px solid rgba(232,93,42,0.12);animation:auraPulse 4s ease-in-out infinite alternate;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes auraPulse{from{transform:scale(0.95);opacity:0.4;}to{transform:scale(1.05);opacity:0.85;}}
+
+    /* Animated Central Glow Aura */
+    .center-aura {
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,93,42,0.14) 0%, rgba(253,246,238,0) 70%);
+      pointer-events: none;
+      animation: breatheGlow 6s ease-in-out infinite alternate;
+    }
+    @keyframes breatheGlow {
+      0% { transform: scale(0.9) rotate(0deg); opacity: 0.5; }
+      100% { transform: scale(1.15) rotate(15deg); opacity: 0.9; }
+    }
+
+    /* Ambient Sparkle Particles */
+    .particles-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(232,93,42,0.45);
+      animation: floatParticle 8s infinite linear;
+    }
+    .p1 { left: 42%; top: 35%; animation-delay: 0s; animation-duration: 7s; }
+    .p2 { left: 58%; top: 48%; animation-delay: 2s; animation-duration: 9s; }
+    .p3 { left: 48%; top: 62%; animation-delay: 4s; animation-duration: 6s; }
+    @keyframes floatParticle {
+      0% { transform: translateY(0) scale(0.8); opacity: 0; }
+      50% { opacity: 0.8; transform: translateY(-25px) scale(1.2); }
+      100% { transform: translateY(-50px) scale(0.6); opacity: 0; }
+    }
+
+    .hero-title-container {
+      position: relative;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-title {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(1.8rem, 3.4vw, 2.7rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      max-width: 460px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.22em;
+      flex-wrap: nowrap;
+      text-transform: uppercase;
+      user-select: none;
+      cursor: pointer;
+      perspective: 800px;
+    }
+
+    .word {
+      display: inline-flex;
+    }
+
+    .letter {
+      display: inline-block;
+      opacity: 0;
+      transform: perspective(600px) rotateX(40deg) translateY(24px) scale(0.85);
+      filter: blur(6px);
+      animation: letterPop 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      animation-delay: calc(1.8s + (var(--i) * 0.04s));
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s, text-shadow 0.3s;
+      background: linear-gradient(135deg, var(--ink) 0%, #3a2818 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .letter.highlight {
+      background: linear-gradient(135deg, var(--rust) 0%, #ff7b47 45%, var(--rust2) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: letterPop 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, gradientShift 5s ease infinite;
+      animation-delay: calc(1.8s + (var(--i) * 0.04s)), calc(2.6s + (var(--i) * 0.04s));
+    }
+
+    .hero-title:hover .letter {
+      animation: letterWave 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) ease-in-out;
+      animation-delay: calc(var(--i) * 0.03s);
+      filter: drop-shadow(0 4px 12px rgba(232,93,42,0.3));
+    }
+
+    @keyframes letterPop {
+      0% {
+        opacity: 0;
+        transform: perspective(600px) rotateX(40deg) translateY(24px) scale(0.85);
+        filter: blur(6px);
+      }
+      100% {
+        opacity: 1;
+        transform: perspective(600px) rotateX(0deg) translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    @keyframes letterWave {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.12) rotate(2deg); }
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .hero-hand-icon {
+      font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+      display: inline-block;
+      margin-left: 2px;
+      opacity: 0;
+      transform: scale(0) rotate(-20deg);
+      animation: handWaveIn 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 2.4s forwards, gentleWiggle 3.2s ease-in-out 3.2s infinite;
+      filter: drop-shadow(0 4px 10px rgba(232,93,42,0.3));
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .hero-hand-icon:hover {
+      transform: scale(1.3) rotate(25deg) !important;
+    }
+
+    @keyframes handWaveIn {
+      to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    @keyframes gentleWiggle {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      25% { transform: rotate(14deg) translateY(-5px); }
+      75% { transform: rotate(-8deg) translateY(3px); }
+    }
+
+    /* Animated Accent Beam below title */
+    .title-beam {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--rust), transparent);
+      border-radius: 100px;
+      margin-top: 6px;
+      opacity: 0;
+      animation: beamFade 0.8s ease-out 2.7s forwards, beamPulse 3s ease-in-out 3.5s infinite alternate;
+    }
+    @keyframes beamFade { to { opacity: 1; } }
+    @keyframes beamPulse {
+      0% { width: 45px; opacity: 0.6; }
+      100% { width: 95px; opacity: 1; filter: drop-shadow(0 0 8px rgba(232,93,42,0.7)); }
+    }
+
+    .quote {
+      max-width:420px;padding:16px 22px;background:rgba(253,246,238,.92);
+      backdrop-filter:blur(12px);border-left:3px solid var(--rust);
+      border-radius:0 14px 14px 0;text-align:left;margin-bottom:28px;
+      box-shadow:0 6px 30px rgba(26,18,8,.09);
+      transition:transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .quote::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(232,93,42,0.06), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+    .quote:hover::before {
+      transform: translateX(100%);
+    }
+    .quote:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(232,93,42,0.18);
+      border-left-color: var(--rust2);
+    }
+    .quote p{font-family:"Instrument Serif",serif;font-style:italic;font-size:.96rem;
+             line-height:1.65;color:var(--ink);margin-bottom:10px;}
+    .quote-name{font-family:"Syne",sans-serif;font-size:.75rem;font-weight:700;
+                letter-spacing:.06em;text-transform:uppercase;color:var(--rust);
+                display:block;margin-bottom:2px;}
+    .quote-role{font-family:"DM Sans",sans-serif;font-size:.68rem;font-weight:400;
+                letter-spacing:.05em;text-transform:uppercase;color:rgba(26,18,8,.5);}
+
+    /* Enhanced Launch Button */
+    .btn-start-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    .btn-start-aura {
+      position: absolute;
+      inset: -4px;
+      border-radius: 100px;
+      background: linear-gradient(135deg, var(--rust), var(--ink));
+      opacity: 0;
+      filter: blur(10px);
+      transition: opacity 0.3s ease;
+    }
+    .btn-start-wrapper:hover .btn-start-aura {
+      opacity: 0.6;
+    }
+
+    .btn-start{position:relative;display:inline-flex;align-items:center;gap:14px;background:var(--ink);
+               color:var(--cream);border:none;border-radius:100px;padding:18px 44px;
+               font-family:"DM Sans",sans-serif;font-size:1rem;font-weight:700;
+               cursor:pointer;letter-spacing:.01em;box-shadow:0 8px 34px rgba(26,18,8,.3);
+               transition:transform .25s cubic-bezier(0.34, 1.56, 0.64, 1),box-shadow .25s ease,background .25s ease;
+               animation:btnPulseAura 3s infinite alternate;}
+    @keyframes btnPulseAura {
+      0% { box-shadow: 0 8px 30px rgba(26,18,8,.3); }
+      100% { box-shadow: 0 10px 38px rgba(232,93,42,.35), 0 0 0 8px rgba(232,93,42,.08); }
+    }
+    .btn-start:hover{transform:translateY(-4px) scale(1.03);background:var(--rust2);
+                     box-shadow:0 18px 48px rgba(200,68,26,.52);}
+    .btn-start:active{transform:scale(.96);}
+    .arrow{font-size:1.2rem;display:inline-block;transition:transform .25s ease;}
+    .btn-start:hover .arrow{transform:translateX(7px) scale(1.15);}
+    
+    .hint{margin-top:13px;font-size:.78rem;color:rgba(26,18,8,.5);letter-spacing:.03em;font-weight:600;
+          transition:color 0.3s ease;}
+    .hint:hover{color:var(--rust);}
+
+    .out{position:fixed;inset:0;z-index:999;background:var(--ink);opacity:0;
+         pointer-events:none;transition:opacity .5s ease;}
+    .out.go{opacity:1;}
+  </style>
+</head>
+<body>
+  <div class="hands-frame">
+    <img class="hands-img" src="/static/hands-circle.png" alt="Signing hands"/>
+    <div class="wash"></div>
+  </div>
+  <div style="position:fixed;inset:0;z-index:20;pointer-events:none;">
+    <div class="rings">
+      <div class="ring r1"></div>
+      <div class="ring r2"></div>
+      <div class="ring r3"></div>
+      <div class="center-aura"></div>
+      <div class="particles-layer">
+        <div class="particle p1"></div>
+        <div class="particle p2"></div>
+        <div class="particle p3"></div>
+      </div>
+    </div>
+  </div>
+  <div class="center" id="centerContent">
+    <div class="hero-title-container">
+      <h1 class="hero-title" aria-label="GestureTalk">
+        <span class="word word-gesture">
+          <span class="letter" style="--i:0">G</span><span class="letter" style="--i:1">e</span><span class="letter" style="--i:2">s</span><span class="letter" style="--i:3">t</span><span class="letter" style="--i:4">u</span><span class="letter" style="--i:5">r</span><span class="letter" style="--i:6">e</span>
+        </span>
+        <span class="word word-talk">
+          <span class="letter highlight" style="--i:7">T</span><span class="letter highlight" style="--i:8">a</span><span class="letter highlight" style="--i:9">l</span><span class="letter highlight" style="--i:10">k</span>
+        </span>
+        <span class="hero-hand-icon" title="Wave!">✋</span>
+      </h1>
+      <div class="title-beam"></div>
+    </div>
+
+    <div class="quote">
+      <p>"Direct gesture recognition mapped to complete sentences with sub-2ms latency, 20-language translation, and AI speech synthesis."</p>
+      <span class="quote-name">GestureTalk Competition System</span>
+      <span class="quote-role">YOLO11 Pose + MediaPipe + GRU Classifier</span>
+    </div>
+
+    <div class="btn-start-wrapper">
+      <div class="btn-start-aura"></div>
+      <button class="btn-start" onclick="enterApp()">
+        Launch Competition Interpreter <span class="arrow">→</span>
+      </button>
+    </div>
+    <div class="hint">YOLO11 & MediaPipe &nbsp;·&nbsp; Sub-2ms Latency &nbsp;·&nbsp; 20 Languages &nbsp;·&nbsp; AI Voice</div>
+  </div>
+  <div class="out" id="out"></div>
+
+  <script>
+    function enterApp(){
+      document.getElementById('out').classList.add('go');
+      setTimeout(()=>{window.location.href='/app';},580);
+    }
+
+    // Subtle 3D Mouse Parallax Effect
+    const centerEl = document.getElementById('centerContent');
+    document.addEventListener('mousemove', (e) => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const dx = (e.clientX - cx) / cx;
+      const dy = (e.clientY - cy) / cy;
+      const tiltX = (dy * -4).toFixed(2);
+      const tiltY = (dx * 4).toFixed(2);
+      centerEl.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(0)`;
+    });
+  </script>
+</body>
+</html>

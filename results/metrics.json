@@ -1,0 +1,126 @@
+{
+    "num_classes": 7,
+    "total_samples": 1400,
+    "train_samples": 980,
+    "validation_samples": 210,
+    "test_samples": 210,
+    "epochs_trained": 60,
+    "best_val_accuracy": 1.0,
+    "best_val_loss": 1.8094646293320693e-05,
+    "test_accuracy": 1.0,
+    "test_loss": 1.8942133465316147e-05,
+    "macro_precision": 1.0,
+    "macro_recall": 1.0,
+    "macro_f1": 1.0,
+    "weighted_f1": 1.0,
+    "confusion_matrix": [
+        [
+            30,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            30,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            30,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            30,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            30,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            30,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            30
+        ]
+    ],
+    "per_class": {
+        "ONE_FINGER": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "test_samples": 30
+        },
+        "TWO_FINGERS": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "test_samples": 30
+        },
+        "THREE_FINGERS": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "test_samples": 30
+        },
+        "FOUR_FINGERS": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "test_samples": 30
+        },
+        "OPEN_PALM": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "test_samples": 30
+        },
+        "OK_SIGN": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "test_samples": 30
+        },
+        "FIST": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0,
+            "test_samples": 30
+        }
+    },
+    "tflite_export": true
+}

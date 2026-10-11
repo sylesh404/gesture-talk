@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GestureTalk — Competition Edition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream: #fdf6ee;
+      --ink: #1a1208;
+      --rust: #e85d2a;
+      --rust2: #c8441a;
+      --sage: #4a7c59;
+      --card: #ffffff;
+      --border: rgba(26, 18, 8, 0.1);
+      --muted: rgba(26, 18, 8, 0.55);
+      --highlight: rgba(232, 93, 42, 0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 200px;
+      mix-blend-mode: multiply;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { display: flex; align-items: center; gap: 14px; }
+    .logo-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--rust);
+      display: grid;
+      place-items: center;
+      font-size: 1.8rem;
+      color: #fff;
+    }
+    .logo-title {
+      font-family: "Syne", sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -.02em;
+    }
+    .logo-badge {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(232, 93, 42, 0.12);
+      color: var(--rust);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .home-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 9px 16px;
+      color: var(--muted);
+      font-size: .85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .home-link:hover { color: var(--ink); border-color: rgba(26,18,8,.25); background: rgba(26,18,8,.04); }
+
+    /* GRID */
+    .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media(max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+    /* CARD & ENTRANCE ANIMATIONS */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 2px 16px rgba(26,18,8,.06);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+      animation: cardEntrance 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(26,18,8,.09);
+      border-color: rgba(232, 93, 42, 0.25);
+    }
+    @keyframes cardEntrance {
+      from { opacity: 0; transform: translateY(18px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .card-title {
+      font-family: "Syne", sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* CAMERA */
+    .camera-wrap {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #1a1208;
+      aspect-ratio: 4/3;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    }
+    #video-feed { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cam-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: rgba(253,246,238,.6);
+      font-size: .92rem;
+      background: radial-gradient(circle at center, rgba(35,24,12,0.9) 0%, rgba(15,10,4,0.95) 100%);
+    }
+    .cam-placeholder .cam-icon {
+      font-size: 3.2rem;
+      animation: iconFloat 3s ease-in-out infinite alternate;
+    }
+    @keyframes iconFloat {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-8px); }
+    }
+
+    /* GESTURE DETECTION CARD */
+    .detection-card {
+      margin-top: 16px;
+      padding: 20px;
+      background: var(--highlight);
+      border: 2px solid rgba(232, 93, 42, 0.2);
+      border-radius: 16px;
+      transition: all .25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .detection-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .gesture-display-wrap { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .gesture-emoji {
+      font-size: 2.8rem;
+      line-height: 1;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .gesture-name {
+      font-family: "Syne", sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--rust);
+      line-height: 1.1;
+      transition: color 0.3s ease;
+    }
+    .gesture-conf-badge {
+      font-size: .85rem;
+      font-weight: 700;
+      background: #fff;
+      color: var(--ink);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.2s ease;
+    }
+    .status-badge {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 8px;
+      transition: all 0.25s ease;
+    }
+    .status-idle { background: rgba(26,18,8,.08); color: var(--muted); }
+    .status-holding {
+      background: rgba(232,93,42,.15);
+      color: var(--rust);
+      animation: holdingPulse 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes holdingPulse {
+      0% { box-shadow: 0 0 0 rgba(232,93,42,0); }
+      100% { box-shadow: 0 0 10px rgba(232,93,42,0.3); }
+    }
+    .status-confirmed {
+      background: rgba(74,124,89,.2);
+      color: var(--sage);
+      box-shadow: 0 0 12px rgba(74,124,89,0.35);
+    }
+    .status-cooldown { background: rgba(26,18,8,.15); color: var(--ink); }
+
+    /* LIVE CAMERA HUD OVERLAY */
+    .cam-hud-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 14px;
+      z-index: 5;
+    }
+    .hud-top-bar, .hud-bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .hud-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(26, 18, 8, 0.78);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+    .hud-conf-value {
+      color: #4ade80;
+      font-family: "Syne", sans-serif;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    /* CONFIDENCE METER BAR */
+    .conf-meter-container {
+      margin-top: 14px;
+      margin-bottom: 10px;
+    }
+    .conf-meter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .conf-meter-bar-wrap {
+      background: rgba(26, 18, 8, 0.08);
+      border-radius: 100px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .conf-meter-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, #ef4444, #f59e0b, #4a7c59);
+      transition: width 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+    }
+
+    /* HOLD BAR SHIMMER */
+    .hold-bar-wrap { background: rgba(26,18,8,.08); border-radius: 100px; height: 10px; overflow: hidden; margin-top: 10px; }
+    .hold-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--sage), var(--rust), #ff7b47);
+      background-size: 200% 100%;
+      animation: barShimmer 2s linear infinite;
+      transition: width .15s ease;
+    }
+    @keyframes barShimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    /* CONTROLS */
+    .camera-controls { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-family: "DM Sans", sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-2px) scale(1.01); }
+    .btn:active { transform: scale(0.97); }
+    .btn-rust { background: var(--rust); color: #fff; box-shadow: 0 4px 18px rgba(232,93,42,.3); }
+    .btn-rust:hover { background: var(--rust2); box-shadow: 0 8px 26px rgba(232,93,42,.48); }
+    .btn-ghost { background: rgba(26,18,8,.06); color: var(--ink); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: rgba(26,18,8,.1); }
+    .btn-sage { background: var(--sage); color: #fff; box-shadow: 0 4px 18px rgba(74,124,89,.25); }
+    .btn-ink { background: var(--ink); color: var(--cream); box-shadow: 0 4px 18px rgba(26,18,8,.2); }
+    .btn-sm { padding: 8px 14px; font-size: .82rem; }
+
+    /* RIGHT PANEL: SENTENCE & TRANSLATION */
+    .sentence-card { display: flex; flex-direction: column; gap: 20px; }
+    .sentence-display-box {
+      background: var(--card);
+      border: 2px solid var(--rust);
+      border-radius: 16px;
+      padding: 24px;
+      min-height: 110px;
+      position: relative;
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .sentence-display-box:hover {
+      box-shadow: 0 6px 24px rgba(232,93,42,0.14);
+    }
+    .sentence-display-title {
+      font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .sentence-text {
+      font-family: "Syne", sans-serif;
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.4;
+      transition: color 0.3s ease;
+    }
+    .sentence-text.placeholder { color: var(--muted); font-size: 1.05rem; font-weight: 500; font-family: "DM Sans", sans-serif; }
+
+    /* RECOGNIZED SENTENCE AUDIO VISUALIZATION */
+    .speech-viz-card {
+      margin-top: 18px;
+      padding: 16px 20px;
+      background: rgba(253, 246, 238, 0.55);
+      border: 1.5px dashed rgba(232, 93, 42, 0.22);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+    .speech-viz-card.is-speaking {
+      background: rgba(232, 93, 42, 0.05);
+      border-style: solid;
+      border-color: rgba(232, 93, 42, 0.45);
+      box-shadow: 0 4px 16px rgba(232, 93, 42, 0.1);
+    }
+    .waveform-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
+      max-width: 440px;
+    }
+    .waveform-side {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 38px;
+      flex: 1;
+      justify-content: center;
+    }
+    .waveform-side .bar {
+      width: 4px;
+      height: 6px;
+      background: var(--rust);
+      border-radius: 4px;
+      opacity: 0.35;
+      transition: height 0.25s ease, opacity 0.25s ease, box-shadow 0.25s ease;
+    }
+    .waveform-side .bar:nth-child(3n+1) { height: 8px; }
+    .waveform-side .bar:nth-child(3n+2) { height: 12px; }
+    .waveform-side .bar:nth-child(3n)   { height: 6px; }
+
+    .speech-viz-card.is-speaking .waveform-side .bar {
+      opacity: 0.95;
+      box-shadow: 0 0 8px rgba(232, 93, 42, 0.45);
+      animation: waveBar 0.8s ease-in-out infinite alternate;
+    }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(1) { animation-delay: 0.05s; animation-duration: 0.6s; }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(2) { animation-delay: 0.15s; animation-duration: 0.85s; }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(3) { animation-delay: 0.25s; animation-duration: 0.5s; }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(4) { animation-delay: 0.35s; animation-duration: 0.75s; }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(5) { animation-delay: 0.1s;  animation-duration: 0.65s; }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(6) { animation-delay: 0.3s;  animation-duration: 0.9s; }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(7) { animation-delay: 0.2s;  animation-duration: 0.55s; }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(8) { animation-delay: 0.4s;  animation-duration: 0.7s; }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(9) { animation-delay: 0.12s; animation-duration: 0.8s; }
+    .speech-viz-card.is-speaking .waveform-side .bar:nth-child(10){ animation-delay: 0.28s; animation-duration: 0.62s; }
+
+    @keyframes waveBar {
+      0%   { height: 6px; }
+      100% { height: 32px; }
+    }
+
+    .mic-center-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid rgba(232, 93, 42, 0.35);
+      box-shadow: 0 4px 14px rgba(232, 93, 42, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+    .speech-viz-card.is-speaking .mic-center-badge {
+      border-color: var(--rust);
+      box-shadow: 0 0 16px rgba(232, 93, 42, 0.45);
+      animation: micPulse 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes micPulse {
+      0%   { transform: scale(1); box-shadow: 0 0 10px rgba(232, 93, 42, 0.3); }
+      100% { transform: scale(1.08); box-shadow: 0 0 20px rgba(232, 93, 42, 0.6); }
+    }
+
+    .speaking-status-text {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-badge.status-ready {
+      background: rgba(26, 18, 8, 0.08);
+      color: var(--muted);
+    }
+    .status-badge.status-speaking {
+      background: rgba(232, 93, 42, 0.18);
+      color: var(--rust);
+      font-weight: 800;
+      animation: badgePulse 1.5s infinite;
+    }
+    @keyframes badgePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.65; }
+    }
+
+    @media (max-width: 500px) {
+      .waveform-wrap { gap: 8px; }
+      .waveform-side { gap: 3px; }
+      .waveform-side .bar { width: 3px; }
+      .mic-center-badge { width: 38px; height: 38px; font-size: 1.1rem; }
+    }
+
+    /* ADVANCED ANALYTICS */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .metric-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .metric-box:hover {
+      border-color: rgba(232, 93, 42, 0.3);
+      box-shadow: 0 4px 12px rgba(26, 18, 8, 0.04);
+    }
+    .metric-value {
+      font-family: "Syne", sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--rust);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .metric-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* TRANSLATION BOX */
+    .translation-display-box {
+      background: rgba(74,124,89,.06);
+      border: 1.5px solid rgba(74,124,89,.3);
+      border-radius: 16px;
+      padding: 22px;
+    }
+    .translation-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .lang-select {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      color: var(--ink);
+      font-size: .9rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+    .translated-text {
+      font-family: "Syne", sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--sage);
+      line-height: 1.4;
+      min-height: 48px;
+    }
+    .translated-text.placeholder { color: var(--muted); font-size: 1rem; font-weight: 500; font-family: "DM Sans", sans-serif; }
+
+    /* LIVE SPEECH SWITCH */
+    .live-speech-card {
+      padding: 16px 20px;
+      background: rgba(74,124,89,.08);
+      border: 1.5px solid rgba(74,124,89,.25);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .live-speech-info { display: flex; align-items: center; gap: 12px; }
+    .live-speech-title { font-family: "Syne", sans-serif; font-size: .95rem; font-weight: 700; color: var(--sage); }
+    .live-speech-sub { font-size: .78rem; color: var(--muted); }
+    .switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: rgba(26,18,8,.2); transition: .3s; border-radius: 26px; }
+    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: #fff; transition: .3s; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+    input:checked + .slider { background-color: var(--sage); }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* GESTURE GUIDE REFERENCE TABLE */
+    .guide-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+    .guide-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .guide-emoji { font-size: 1.5rem; flex-shrink: 0; }
+    .guide-info { line-height: 1.2; }
+    .guide-name { font-size: .75rem; font-weight: 700; color: var(--rust); }
+    .guide-sentence { font-size: .78rem; color: var(--ink); font-weight: 600; margin-top: 2px; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: 12px;
+      padding: 13px 24px;
+      font-weight: 600;
+      font-size: .9rem;
+      opacity: 0;
+      transition: all .3s;
+      z-index: 999;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">✋</div>
+        <div>
+          <div class="logo-title">GestureTalk</div>
+          <div class="logo-badge">Competition Edition</div>
+        </div>
+      </div>
+      <a href="/" class="home-link">← Overview Landing</a>
+    </header>
+
+    <div class="main-grid">
+      <!-- LEFT COLUMN: CAMERA & DETECTION -->
+      <div>
+        <div class="card">
+          <div class="card-title">
+            <span>📷 Live Gesture Camera</span>
+            <span class="status-badge status-idle" id="status-badge">IDLE</span>
+          </div>
+
+          <div class="camera-wrap">
+            <img id="video-feed" src="" alt="Camera Stream" style="display:none"/>
+            
+            <!-- LIVE HUD OVERLAY FOR CAMERA STREAM -->
+            <div class="cam-hud-overlay" id="cam-hud" style="display:none">
+              <div class="hud-top-bar">
+                <div class="hud-pill"><span style="color:#22c55e">●</span> LIVE 30 FPS</div>
+                <div class="hud-pill">🎯 Confidence: <span class="hud-conf-value" id="hud-conf">0.0%</span></div>
+              </div>
+              <div class="hud-bottom-bar">
+                <div class="hud-pill">✋ 21 3D Landmarks</div>
+                <div class="hud-pill" id="hud-status-pill">STATUS: IDLE</div>
+              </div>
+            </div>
+
+            <div class="cam-placeholder" id="cam-placeholder">
+              <div class="cam-icon">📷</div>
+              <div>Click <strong>Start Camera</strong> to begin gesture detection</div>
+            </div>
+          </div>
+
+          <!-- GESTURE DETECTION CARD -->
+          <div class="detection-card" id="detection-card">
+            <div class="detection-header">
+              <span style="font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);">Detected Trigger Gesture</span>
+              <span class="gesture-conf-badge" id="gesture-conf">0.0%</span>
+            </div>
+            <div class="gesture-display-wrap">
+              <div class="gesture-emoji" id="gesture-emoji">❓</div>
+              <div class="gesture-name" id="gesture-name">UNKNOWN</div>
+            </div>
+
+            <!-- CONFIDENCE METER BAR -->
+            <div class="conf-meter-container">
+              <div class="conf-meter-header">
+                <span>Prediction Confidence Score</span>
+                <span id="conf-bar-text" style="color: var(--rust); font-weight: 800;">0.0%</span>
+              </div>
+              <div class="conf-meter-bar-wrap">
+                <div class="conf-meter-bar" id="conf-bar"></div>
+              </div>
+            </div>
+
+            <!-- HOLD PROGRESS BAR -->
+            <div class="hold-bar-wrap">
+              <div class="hold-bar" id="hold-bar"></div>
+            </div>
+            <div style="font-size: .75rem; color: var(--muted); margin-top: 6px; display: flex; justify-content: space-between;">
+              <span>Confirmation Progress</span>
+              <span id="hold-progress-text" style="font-weight: 700; color: var(--ink);">0%</span>
+            </div>
+          </div>
+
+          <div class="camera-controls">
+            <button class="btn btn-rust" id="btn-start-cam">▶ Start Camera</button>
+            <button class="btn btn-ghost" id="btn-stop-cam" style="display:none">⏹ Stop</button>
+            <button class="btn btn-ghost btn-sm" id="btn-reset">🔄 Reset State</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: SENTENCE & TRANSLATION -->
+      <div class="sentence-card">
+        <div class="card">
+          <div class="card-title">
+            <span>💬 Recognized Sentence</span>
+            <span class="status-badge status-ready" id="speech-top-status">● READY</span>
+          </div>
+          <div class="sentence-display-box">
+            <div class="sentence-display-title">Predefined Canonical Sentence (English)</div>
+            <div class="sentence-text placeholder" id="sentence-text">Perform a trigger gesture to generate a sentence...</div>
+
+            <!-- AUDIO VISUALIZATION ENHANCEMENT -->
+            <div class="speech-viz-card" id="speech-viz" aria-label="Speech playback visualization">
+              <div class="waveform-wrap">
+                <div class="waveform-side waveform-left">
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                </div>
+                <div class="mic-center-badge" id="mic-center" title="Speech Audio Indicator">
+                  🎙️
+                </div>
+                <div class="waveform-side waveform-right">
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                  <span class="bar"></span>
+                </div>
+              </div>
+              <div class="speaking-status-text" id="speaking-status-text">
+                <span style="color: var(--muted); font-weight: 600;">✓ Speech ready</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🌍 Multilingual Translation & Speech</div>
+          <div class="translation-display-box">
+            <div class="translation-header">
+              <span style="font-size: .75rem; font-weight: 700; text-transform: uppercase; color: var(--muted);">Target Language</span>
+              <select class="lang-select" id="lang-select">
+                {% for lang in languages %}
+                <option value="{{ lang }}" {% if lang == 'Hindi' %}selected{% endif %}>{{ lang }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="translated-text placeholder" id="translated-text">Translated sentence appears here...</div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+            <button class="btn btn-rust" id="btn-speak">🔊 SPEAK SENTENCE</button>
+            <button class="btn btn-ink" id="btn-translate">🌐 Re-Translate</button>
+          </div>
+
+          <div class="live-speech-card" style="margin-top:16px;">
+            <div class="live-speech-info">
+              <div style="font-size: 1.4rem;">🎙️</div>
+              <div>
+                <div class="live-speech-title">Auto-Speech on Confirmation</div>
+                <div class="live-speech-sub" id="auto-speech-status">Vocalizes translated sentence automatically when gesture is confirmed</div>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-auto-speech" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- ADVANCED ANALYTICS CARD -->
+        <div class="card">
+          <div class="card-title">
+            <span>📊 Advanced Analytics</span>
+            <span class="status-badge status-idle" id="analytics-session-badge">LIVE SESSION</span>
+          </div>
+          <div class="analytics-grid">
+            <div class="metric-box">
+              <div class="metric-value" id="metric-gestures">0</div>
+              <div class="metric-label">Gestures Recognized</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-value" id="metric-success-rate">0.0%</div>
+              <div class="metric-label">Success Rate</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-value" id="metric-avg-conf">0.0%</div>
+              <div class="metric-label">Avg Confidence</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-value" id="metric-resp-time">0 ms</div>
+              <div class="metric-label">Response Time</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-value" id="metric-rejected">0</div>
+              <div class="metric-label">Unknown / Rejected</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-value" id="metric-sentences">0</div>
+              <div class="metric-label">Sentences Generated</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-value" id="metric-fps">0 FPS</div>
+              <div class="metric-label">Camera FPS</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-value" id="metric-duration">00:00</div>
+              <div class="metric-label">Session Duration</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <audio id="audio-player" style="display:none"></audio>
+
+  <script>
+    const API = '';
+    let pollingInterval = null;
+    let isAutoSpeechEnabled = true;
+    let lastConfirmationCount = 0;
+
+    const videoFeed = document.getElementById('video-feed');
+    const camPlaceholder = document.getElementById('cam-placeholder');
+    const statusBadge = document.getElementById('status-badge');
+    const gestureEmoji = document.getElementById('gesture-emoji');
+    const gestureName = document.getElementById('gesture-name');
+    const gestureConf = document.getElementById('gesture-conf');
+    const holdBar = document.getElementById('hold-bar');
+    const holdProgressText = document.getElementById('hold-progress-text');
+    const sentenceText = document.getElementById('sentence-text');
+    const translatedText = document.getElementById('translated-text');
+    const langSelect = document.getElementById('lang-select');
+
+    const toast = document.getElementById('toast');
+    const audioPlayer = document.getElementById('audio-player');
+    const speechViz = document.getElementById('speech-viz');
+    const speechTopStatus = document.getElementById('speech-top-status');
+    const speakingStatusText = document.getElementById('speaking-status-text');
+    let isAudioSpeaking = false;
+
+    function setSpeakingState(speaking) {
+      isAudioSpeaking = speaking;
+      if (speaking) {
+        if (speechViz) speechViz.classList.add('is-speaking');
+        if (speechTopStatus) {
+          speechTopStatus.textContent = '🔴 SPEAKING';
+          speechTopStatus.className = 'status-badge status-speaking';
+        }
+        if (speakingStatusText) {
+          speakingStatusText.innerHTML = '<span style="color: var(--rust); font-weight: 700;">🔊 Speaking...</span>';
+        }
+      } else {
+        if (speechViz) speechViz.classList.remove('is-speaking');
+        if (speechTopStatus) {
+          speechTopStatus.textContent = '● READY';
+          speechTopStatus.className = 'status-badge status-ready';
+        }
+        if (speakingStatusText) {
+          speakingStatusText.innerHTML = '<span style="color: var(--muted); font-weight: 600;">✓ Speech ready</span>';
+        }
+      }
+    }
+
+    if (audioPlayer) {
+      audioPlayer.addEventListener('play', () => setSpeakingState(true));
+      audioPlayer.addEventListener('playing', () => setSpeakingState(true));
+      audioPlayer.addEventListener('pause', () => setSpeakingState(false));
+      audioPlayer.addEventListener('ended', () => setSpeakingState(false));
+      audioPlayer.addEventListener('error', () => setSpeakingState(false));
+    }
+
+    setInterval(() => {
+      const isAudioActive = audioPlayer && !audioPlayer.paused && !audioPlayer.ended && audioPlayer.currentTime > 0;
+      const isWebSpeechActive = ('speechSynthesis' in window) && window.speechSynthesis.speaking;
+
+      if (isAudioActive || isWebSpeechActive) {
+        if (!isAudioSpeaking) setSpeakingState(true);
+      } else {
+        if (isAudioSpeaking) setSpeakingState(false);
+      }
+    }, 150);
+
+    function showToast(msg, dur=2200) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), dur);
+    }
+
+    // Prime Web Speech API on user interaction
+    function primeAudio() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.resume();
+      }
+    }
+    document.addEventListener('click', primeAudio, { once: false });
+
+    document.getElementById('toggle-auto-speech').addEventListener('change', (e) => {
+      isAutoSpeechEnabled = e.target.checked;
+      showToast(isAutoSpeechEnabled ? '🔊 Live Auto-Speech Enabled' : '🔇 Auto-Speech Disabled');
+    });
+
+    const camHud = document.getElementById('cam-hud');
+    const hudConf = document.getElementById('hud-conf');
+    const hudStatusPill = document.getElementById('hud-status-pill');
+    const confBar = document.getElementById('conf-bar');
+    const confBarText = document.getElementById('conf-bar-text');
+
+    document.getElementById('btn-start-cam').addEventListener('click', async () => {
+      primeAudio();
+      showToast('📷 Initializing camera...');
+      try {
+        const res = await fetch(`${API}/api/start_camera`, { method: 'POST' });
+        const data = await res.json();
+        if (data.status === 'started') {
+          videoFeed.src = `${API}/video_feed?t=${Date.now()}`;
+          videoFeed.style.display = 'block';
+          camPlaceholder.style.display = 'none';
+          if (camHud) camHud.style.display = 'flex';
+          document.getElementById('btn-start-cam').style.display = 'none';
+          document.getElementById('btn-stop-cam').style.display = 'inline-flex';
+          startPolling();
+          showToast('✅ Camera Active! Live Gesture & Speech Ready.');
+        } else {
+          showToast('❌ Camera initialization failed');
+        }
+      } catch (err) {
+        showToast('❌ Camera error: ' + err.message);
+      }
+    });
+
+    document.getElementById('btn-stop-cam').addEventListener('click', async () => {
+      try {
+        await fetch(`${API}/api/stop_camera`, { method: 'POST' });
+        stopPolling();
+        videoFeed.style.display = 'none';
+        videoFeed.src = '';
+        if (camHud) camHud.style.display = 'none';
+        camPlaceholder.style.display = 'flex';
+        document.getElementById('btn-start-cam').style.display = 'inline-flex';
+        document.getElementById('btn-stop-cam').style.display = 'none';
+        showToast('⏹ Camera stopped');
+      } catch (err) {
+        showToast('Error stopping camera');
+      }
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', async () => {
+      await fetch(`${API}/api/reset_state`, { method: 'POST' });
+      sentenceText.textContent = 'Perform a trigger gesture to generate a sentence...';
+      sentenceText.classList.add('placeholder');
+      translatedText.textContent = 'Translated sentence appears here...';
+      translatedText.classList.add('placeholder');
+      lastConfirmationCount = 0;
+      showToast('🔄 State reset');
+    });
+
+    langSelect.addEventListener('change', async () => {
+      const lang = langSelect.value;
+      showToast(`🌐 Target language: ${lang}`);
+      await fetch(`${API}/api/set_language`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: lang })
+      });
+      translateSentence();
+    });
+
+    document.getElementById('btn-translate').addEventListener('click', translateSentence);
+
+    async function translateSentence() {
+      const sentence = sentenceText.textContent;
+      if (!sentence || sentenceText.classList.contains('placeholder')) return;
+      const lang = langSelect.value;
+      try {
+        const res = await fetch(`${API}/api/translate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sentence: sentence, language: lang })
+        });
+        const data = await res.json();
+        if (data.success) {
+          translatedText.textContent = data.translated_text;
+          translatedText.classList.remove('placeholder');
+        }
+      } catch (err) {
+        console.error('Translation error:', err);
+      }
+    }
+
+    document.getElementById('btn-speak').addEventListener('click', speakSentence);
+
+    function speakSentence() {
+      const targetText = (!translatedText.classList.contains('placeholder') && translatedText.textContent.trim())
+        ? translatedText.textContent.trim()
+        : (sentenceText.classList.contains('placeholder') ? '' : sentenceText.textContent.trim());
+
+      if (!targetText) {
+        showToast('⚠️ No sentence to speak');
+        return;
+      }
+
+      const lang = langSelect.value;
+      showToast(`🎙️ Live Speech: "${targetText}"`);
+
+      // 1. Instant zero-latency Browser Web Speech API
+      let webSpeechStarted = false;
+      if ('speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(targetText);
+          utterance.rate = 0.95;
+          utterance.pitch = 1.0;
+
+          const langMap = {
+            'English': 'en-US', 'Hindi': 'hi-IN', 'Tamil': 'ta-IN', 'Malayalam': 'ml-IN',
+            'Bengali': 'bn-IN', 'Marathi': 'mr-IN', 'Gujarati': 'gu-IN', 'Urdu': 'ur-PK',
+            'Spanish': 'es-ES', 'French': 'fr-FR', 'German': 'de-DE', 'Arabic': 'ar-SA',
+            'Chinese': 'zh-CN', 'Japanese': 'ja-JP', 'Korean': 'ko-KR', 'Russian': 'ru-RU',
+            'Portuguese': 'pt-BR'
+          };
+          if (langMap[lang]) utterance.lang = langMap[lang];
+
+          const voices = window.speechSynthesis.getVoices();
+          if (voices && voices.length > 0) {
+            const targetPrefix = (langMap[lang] || 'en').toLowerCase().split('-')[0];
+            const matchingVoice = voices.find(v => v.lang.toLowerCase().includes(targetPrefix));
+            if (matchingVoice) utterance.voice = matchingVoice;
+          }
+
+          utterance.onstart = () => setSpeakingState(true);
+          utterance.onend = () => setSpeakingState(false);
+          utterance.onerror = () => setSpeakingState(false);
+
+          window.speechSynthesis.speak(utterance);
+          webSpeechStarted = true;
+        } catch (e) {
+          console.warn('Web Speech API note:', e);
+        }
+      }
+
+      // 2. High Quality gTTS backend fallback
+      fetch(`${API}/api/speak`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sentence: sentenceText.textContent, language: lang })
+      }).then(res => {
+        if (res.ok) return res.blob();
+        throw new Error('TTS fetch status non-200');
+      }).then(blob => {
+        if (!webSpeechStarted || (('speechSynthesis' in window) && !window.speechSynthesis.speaking)) {
+          const audioUrl = URL.createObjectURL(blob);
+          audioPlayer.src = audioUrl;
+          audioPlayer.play().catch(err => console.log('Audio playback note:', err));
+        }
+      }).catch(err => {
+        console.log('gTTS fallback note:', err);
+      });
+    }
+
+    function startPolling() {
+      if (pollingInterval) clearInterval(pollingInterval);
+      pollingInterval = setInterval(pollState, 50);
+    }
+
+    function updateAnalyticsUI(analytics) {
+      if (!analytics) return;
+      const mGestures = document.getElementById('metric-gestures');
+      const mSuccess = document.getElementById('metric-success-rate');
+      const mConf = document.getElementById('metric-avg-conf');
+      const mResp = document.getElementById('metric-resp-time');
+      const mRejected = document.getElementById('metric-rejected');
+      const mSentences = document.getElementById('metric-sentences');
+      const mFps = document.getElementById('metric-fps');
+      const mDuration = document.getElementById('metric-duration');
+
+      if (mGestures) mGestures.textContent = analytics.gestures_recognized;
+      if (mSuccess) mSuccess.textContent = `${analytics.success_rate.toFixed(1)}%`;
+      if (mConf) mConf.textContent = `${analytics.avg_confidence.toFixed(1)}%`;
+      if (mResp) mResp.textContent = analytics.avg_response_time_ms > 0 ? `${Math.round(analytics.avg_response_time_ms)} ms` : 'N/A';
+      if (mRejected) mRejected.textContent = analytics.rejected_gestures;
+      if (mSentences) mSentences.textContent = analytics.sentences_generated;
+      if (mFps) mFps.textContent = analytics.fps > 0 ? `${analytics.fps.toFixed(1)} FPS` : '0 FPS';
+
+      if (mDuration) {
+        const sec = analytics.session_duration_sec || 0;
+        const mins = Math.floor(sec / 60).toString().padStart(2, '0');
+        const secs = (sec % 60).toString().padStart(2, '0');
+        mDuration.textContent = `${mins}:${secs}`;
+      }
+    }
+
+    async function pollState() {
+      try {
+        const res = await fetch(`${API}/api/state`);
+        const state = await res.json();
+
+        // Update Analytics UI
+        if (state.analytics) {
+          updateAnalyticsUI(state.analytics);
+        }
+
+        // Update Detection UI
+        const newEmoji = state.icon || '❓';
+        if (gestureEmoji.textContent !== newEmoji) {
+          gestureEmoji.textContent = newEmoji;
+          gestureEmoji.classList.remove('pop');
+          void gestureEmoji.offsetWidth;
+          gestureEmoji.classList.add('pop');
+        }
+
+        gestureName.textContent = state.gesture || 'UNKNOWN';
+        const confVal = state.confidence || 0.0;
+        const confStr = `${confVal.toFixed(1)}%`;
+
+        // Update Badges & Meters
+        gestureConf.textContent = confStr;
+        if (hudConf) hudConf.textContent = confStr;
+        if (confBarText) confBarText.textContent = confStr;
+        if (confBar) confBar.style.width = `${Math.min(100, Math.max(0, confVal))}%`;
+
+        // Badge color shift based on confidence value
+        if (confVal >= 80) {
+          gestureConf.style.background = 'rgba(74, 124, 89, 0.15)';
+          gestureConf.style.color = 'var(--sage)';
+          gestureConf.style.borderColor = 'rgba(74, 124, 89, 0.4)';
+        } else if (confVal >= 55) {
+          gestureConf.style.background = 'rgba(232, 93, 42, 0.15)';
+          gestureConf.style.color = 'var(--rust)';
+          gestureConf.style.borderColor = 'rgba(232, 93, 42, 0.4)';
+        } else {
+          gestureConf.style.background = 'rgba(26, 18, 8, 0.08)';
+          gestureConf.style.color = 'var(--muted)';
+          gestureConf.style.borderColor = 'var(--border)';
+        }
+
+        holdBar.style.width = `${state.hold_progress}%`;
+        holdProgressText.textContent = `${state.hold_progress}%`;
+
+        // Status Badges
+        const currentStatus = (state.status || 'IDLE').toUpperCase();
+        statusBadge.textContent = currentStatus;
+        statusBadge.className = `status-badge status-${state.status || 'idle'}`;
+        if (hudStatusPill) hudStatusPill.textContent = `STATUS: ${currentStatus}`;
+
+        // Sentence & Translation Updates
+        if (state.sentence) {
+          if (sentenceText.textContent !== state.sentence) {
+            sentenceText.textContent = state.sentence;
+            sentenceText.classList.remove('placeholder');
+            sentenceText.classList.remove('updated');
+            void sentenceText.offsetWidth;
+            sentenceText.classList.add('updated');
+          }
+          if (state.translated_sentence && translatedText.textContent !== state.translated_sentence) {
+            translatedText.textContent = state.translated_sentence;
+            translatedText.classList.remove('placeholder');
+          }
+
+          // Trigger Instant Live Speech whenever gesture is confirmed
+          if (state.confirmation_count > lastConfirmationCount) {
+            lastConfirmationCount = state.confirmation_count;
+            if (isAutoSpeechEnabled) {
+              speakSentence();
+            }
+          }
+        }
+      } catch (err) {
+        console.error('State poll error:', err);
+      }
+    }
+  </script>
+</body>
+</html>
